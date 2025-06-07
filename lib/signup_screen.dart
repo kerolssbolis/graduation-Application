@@ -1,244 +1,119 @@
 import 'package:flutter/material.dart';
-import 'package:email_validator/email_validator.dart';
+import 'package:traffic_app/appcolors.dart';
 
 class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
+
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF283747),
+      backgroundColor:AppColors.blueblue,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Create an account',
+                const Text(
+                  'Admin Log In',
                   style: TextStyle(
                     fontSize: 32,
-                    fontWeight: FontWeight.w300,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 35),
-                // Name Field
-                Text(
-                  'Name',
-                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w300,
-                    fontSize: 26,
                   ),
                 ),
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter your full name',
-                    hintStyle: TextStyle(color: Colors.white),
-                    prefixIcon: Icon(Icons.person_outline, color: Colors.white),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
-                  ),
-                  style: TextStyle(color: Colors.white),
-                  validator:
-                      (value) =>
-                          value == null || value.isEmpty
-                              ? 'Enter your name'
-                              : null,
-                ),
-                SizedBox(height: 20),
-                // Email Field
-                Text(
-                  'Email',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300,
-                    fontSize: 26,
-                  ),
-                ),
-                SizedBox(height: 10),
+                const SizedBox(height: 40),
                 TextFormField(
                   controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    hintText: 'Enter your email address',
-                    hintStyle: TextStyle(color: Colors.white),
-                    prefixIcon: Icon(Icons.email_outlined, color: Colors.white),
+                    hintText: 'Enter admin email',
+                    hintStyle: const TextStyle(color: Colors.white70),
+                    prefixIcon: const Icon(Icons.email_outlined, color: Colors.white),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.blue),
+                      borderSide: const BorderSide(color: Colors.blue),
                     ),
                   ),
-                  style: TextStyle(color: Colors.white),
-                  validator:
-                      (value) =>
-                          value != null && EmailValidator.validate(value)
-                              ? null
-                              : 'Enter a valid email',
+                  style: const TextStyle(color: Colors.white),
+                  validator: (value) {
+                    if (value == null || !value.contains('@')) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
                 ),
-                SizedBox(height: 20),
-                // Password Field
-                Text(
-                  'Password',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300,
-                    fontSize: 26,
-                  ),
-                ),
-                SizedBox(height: 10),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: passwordController,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    hintText: 'Enter a secure password',
-                    hintStyle: TextStyle(color: Colors.white),
-                    prefixIcon: Icon(Icons.lock_outline, color: Colors.white),
+                    hintText: 'Enter password',
+                    hintStyle: const TextStyle(color: Colors.white70),
+                    prefixIcon: const Icon(Icons.lock_outline, color: Colors.white),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
                         color: Colors.white,
                       ),
-                      onPressed:
-                          () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.blue),
+                      borderSide: const BorderSide(color: Colors.blue),
                     ),
                   ),
-                  style: TextStyle(color: Colors.white),
-                  validator:
-                      (value) =>
-                          value != null && value.length >= 6
-                              ? null
-                              : 'Password must be at least 6 characters',
+                  style: const TextStyle(color: Colors.white),
+                  validator: (value) {
+                    if (value == null || value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  },
                 ),
-                SizedBox(height: 20),
-                // Confirm Password Field
-                Text(
-                  'Confirm Password',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300,
-                    fontSize: 26,
-                  ),
-                ),
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  decoration: InputDecoration(
-                    hintText: 'Re-enter your password',
-                    hintStyle: TextStyle(color: Colors.white),
-                    prefixIcon: Icon(Icons.lock_outline, color: Colors.white),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: Colors.white,
-                      ),
-                      onPressed:
-                          () => setState(
-                            () =>
-                                _obscureConfirmPassword =
-                                    !_obscureConfirmPassword,
-                          ),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
-                  ),
-                  style: TextStyle(color: Colors.white),
-                  validator:
-                      (value) =>
-                          value == passwordController.text
-                              ? null
-                              : 'Passwords do not match',
-                ),
-                SizedBox(height: 40),
+                const SizedBox(height: 40),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        Navigator.pushNamed(context, '/home');
+                        // بعد التسجيل، روح لصفحة اختيار الأدمن
+                        Navigator.pushNamed(context, '/admin_options');
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(
-                      'Sign Up',
-                      style: TextStyle(fontSize: 20, color: Colors.white),
+                    child: const Text(
+                      'Log In',
+                      style: TextStyle(fontSize: 18),
                     ),
                   ),
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Already have an account? ",
-                      style: TextStyle(
-                        color: Colors.grey[300],
-                        fontWeight: FontWeight.w300,
-                        fontSize: 18,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, '/login'),
-                      child: Text(
-                        'Login',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:traffic_app/roleselectio_screen.dart';
+import 'adminadd_user.dart';
+import 'adminoption_screen.dart';
 import 'splash_screen.dart';
 import 'onboarding.dart';
 import 'welcome.dart';
@@ -20,9 +23,11 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => SplashScreen(),
         '/onboarding': (context) => OnboardingScreens(),
-        '/welcome': (context) => WelcomeScreen(),
+        '/role_selection': (context) => RoleSelectionScreen(),
         '/login': (context) => LoginScreen(),
         '/signup': (context) => SignUpScreen(),
+        '/admin_home': (context) => const AdminHomeScreen(),
+        '/admin_options': (context) => const AdminOptionsScreen(),
         '/home': (context) => HomeScreen(),
       },
     );

@@ -83,7 +83,7 @@ class _OnboardingScreensState extends State<OnboardingScreens> {
                       curve: Curves.easeIn,
                     );
                   } else {
-                    Navigator.pushReplacementNamed(context, '/welcome');
+                    Navigator.pushReplacementNamed(context, '/role_selection');
                   }
                 },
                 style: ElevatedButton.styleFrom(

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_list.dart';
 import 'package:flutter_signin_button/button_view.dart';
 import 'package:traffic_app/appcolors.dart';
@@ -79,3 +79,4 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 }
+*/

@@ -1,38 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:email_validator/email_validator.dart';
+import 'package:traffic_app/appcolors.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController nationalIdController = TextEditingController();
+  final TextEditingController vehicleNumberController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   bool _obscurePassword = true;
-  String? emailError;
+
+  String? nationalIdError;
+  String? vehicleNumberError;
   String? passwordError;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF283747),
+      backgroundColor:AppColors.blueblue,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Login to your account . .',
+              const Text(
+                'Login to your account',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w300,
                   fontSize: 32,
                 ),
               ),
-              SizedBox(height: 20),
-              Text(
+              const SizedBox(height: 20),
+              const Text(
                 'Welcome back',
                 style: TextStyle(
                   fontSize: 24,
@@ -40,116 +46,53 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: Colors.white,
                 ),
               ),
-              SizedBox(height: 35),
-              // Email Field
-              Text(
-                'Email',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w300,
-                  fontSize: 26,
-                ),
+              const SizedBox(height: 35),
+
+              _buildTextField(
+                label: 'National ID',
+                controller: nationalIdController,
+                errorText: nationalIdError,
+                keyboardType: TextInputType.number,
+                icon: Icons.credit_card,
               ),
-              SizedBox(height: 10),
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: 'Enter your email',
-                  hintStyle: TextStyle(color: Colors.white),
-                  errorText: emailError,
-                  prefixIcon: Icon(Icons.email_outlined, color: Colors.white),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF757575)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.blue),
-                  ),
-                ),
-                style: TextStyle(color: Colors.white),
+              const SizedBox(height: 20),
+
+              _buildTextField(
+                label: 'Vehicle Number',
+                controller: vehicleNumberController,
+                errorText: vehicleNumberError,
+                keyboardType: TextInputType.text,
+                icon: Icons.directions_car,
               ),
-              SizedBox(height: 20),
-              // Password Field
-              Text(
-                'Password',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w300,
-                  fontSize: 26,
-                ),
-              ),
-              SizedBox(height: 10),
-              TextField(
-                controller: passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  hintText: 'Enter your password',
-                  hintStyle: TextStyle(color: Colors.white),
-                  errorText: passwordError,
-                  prefixIcon: Icon(Icons.lock_outline, color: Colors.white),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: Colors.white,
-                    ),
-                    onPressed:
-                        () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFF757575)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.blue),
-                  ),
-                ),
-                style: TextStyle(color: Colors.white),
-              ),
-              SizedBox(height: 40),
+              const SizedBox(height: 20),
+
+              _buildPasswordField(),
+
+              const SizedBox(height: 40),
+
               // Login Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    final email = emailController.text;
-                    final password = passwordController.text;
-
-                    setState(() {
-                      emailError =
-                          !EmailValidator.validate(email)
-                              ? 'Please enter a valid email'
-                              : null;
-                      passwordError =
-                          password.isEmpty ? 'Password cannot be empty' : null;
-                    });
-
-                    if (emailError == null && passwordError == null) {
-                      Navigator.pushNamed(context, '/home');
-                    }
-                  },
+                  onPressed: _validateAndLogin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Login',
                     style: TextStyle(fontSize: 20, color: Colors.white),
                   ),
                 ),
               ),
-              SizedBox(height: 20),
-              // Sign Up Link
-              Row(
+
+              const SizedBox(height: 20),
+
+              // Sign up
+             Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
@@ -161,8 +104,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/signup'),
-                    child: Text(
+                    onTap: () => Navigator.pushNamed(context, '/home'),
+                    child: const Text(
                       'Sign up',
                       style: TextStyle(
                         color: Colors.blue,
@@ -178,5 +121,108 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required String? errorText,
+    required TextInputType keyboardType,
+    required IconData icon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w300,
+            fontSize: 22,
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: 'Enter your $label',
+            hintStyle: const TextStyle(color: Colors.white),
+            errorText: errorText,
+            prefixIcon: Icon(icon, color: Colors.white),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.blue),
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          style: const TextStyle(color: Colors.white),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Password',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w300,
+            fontSize: 22,
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: passwordController,
+          obscureText: _obscurePassword,
+          decoration: InputDecoration(
+            hintText: 'Enter your password',
+            hintStyle: const TextStyle(color: Colors.white),
+            errorText: passwordError,
+            prefixIcon: const Icon(Icons.lock_outline, color: Colors.white),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.blue),
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          style: const TextStyle(color: Colors.white),
+        ),
+      ],
+    );
+  }
+
+  void _validateAndLogin() {
+    final nationalId = nationalIdController.text;
+    final vehicleNumber = vehicleNumberController.text;
+    final password = passwordController.text;
+
+    setState(() {
+      nationalIdError = nationalId.length != 14 ? 'Enter a valid 14-digit ID' : null;
+      vehicleNumberError = vehicleNumber.isEmpty ? 'Vehicle number is required' : null;
+      passwordError = password.isEmpty ? 'Password is required' : null;
+    });
+
+    if (nationalIdError == null && vehicleNumberError == null && passwordError == null) {
+      Navigator.pushNamed(context, '/home');
+    }
   }
 }
