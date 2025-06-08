@@ -23,6 +23,8 @@ class AdminOptionsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 40),
+
+              // زر إضافة يوزر
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/admin_home');
@@ -37,6 +39,24 @@ class AdminOptionsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+
+              // زر إضافة أدمن
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/add_admin');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrange,
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+                child: const Text(
+                  'Add New Admin',
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // زر خريطة الطرق
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/home');

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:traffic_app/appcolors.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -9,15 +11,60 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final TextEditingController emailController = TextEditingController();
+  final TextEditingController nationalIdController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
+  bool _isLoading = false;
+
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final url = Uri.parse('https://taha454-trafficmanager-account.hf.space/mobile/login/');
+    final payload = {
+      "national_id": nationalIdController.text,
+      "password": passwordController.text,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(payload),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        // ممكن تتحقق من محتوى الرد هنا لو حبيت
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login successful')),
+        );
+        Navigator.pushNamed(context, '/admin_options');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:AppColors.blueblue,
+      backgroundColor: AppColors.blueblue,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -36,11 +83,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 40),
                 TextFormField(
-                  controller: emailController,
+                  controller: nationalIdController,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    hintText: 'Enter admin email',
+                    hintText: 'Enter National ID',
                     hintStyle: const TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(Icons.email_outlined, color: Colors.white),
+                    prefixIcon: const Icon(Icons.credit_card, color: Colors.white),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -51,8 +99,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   style: const TextStyle(color: Colors.white),
                   validator: (value) {
-                    if (value == null || !value.contains('@')) {
-                      return 'Please enter a valid email';
+                    if (value == null || value.length != 14 || !RegExp(r'^\d+$').hasMatch(value)) {
+                      return 'Please enter a valid 14-digit National ID';
                     }
                     return null;
                   },
@@ -96,12 +144,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // بعد التسجيل، روح لصفحة اختيار الأدمن
-                        Navigator.pushNamed(context, '/admin_options');
-                      }
-                    },
+                    onPressed: _isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: Colors.white,
@@ -109,7 +152,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.blue)
+                        : const Text(
                       'Log In',
                       style: TextStyle(fontSize: 18),
                     ),

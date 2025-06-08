@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:traffic_app/appcolors.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'appcolors.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,108 +22,49 @@ class _LoginScreenState extends State<LoginScreen> {
   String? vehicleNumberError;
   String? passwordError;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor:AppColors.blueblue,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Login to your account',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w300,
-                  fontSize: 32,
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Welcome back',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w300,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 35),
+  Future<bool> login(String nationalId, String vehicleNumber, String password) async {
+    final url = Uri.parse("https://taha454-trafficmanager-account.hf.space/mobile/login/");
 
-              _buildTextField(
-                label: 'National ID',
-                controller: nationalIdController,
-                errorText: nationalIdError,
-                keyboardType: TextInputType.number,
-                icon: Icons.credit_card,
-              ),
-              const SizedBox(height: 20),
-
-              _buildTextField(
-                label: 'Vehicle Number',
-                controller: vehicleNumberController,
-                errorText: vehicleNumberError,
-                keyboardType: TextInputType.text,
-                icon: Icons.directions_car,
-              ),
-              const SizedBox(height: 20),
-
-              _buildPasswordField(),
-
-              const SizedBox(height: 40),
-
-              // Login Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _validateAndLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(fontSize: 20, color: Colors.white),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Sign up
-             Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Don't have an account? ",
-                    style: TextStyle(
-                      color: Colors.grey[300],
-                      fontWeight: FontWeight.w300,
-                      fontSize: 18,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/home'),
-                    child: const Text(
-                      'Sign up',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "national_id": nationalId,
+        "password": password,
+      }),
     );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      print(data);
+      return true;
+    } else {
+      print("Error: ${response.statusCode} - ${response.body}");
+      return false;
+    }
+  }
+
+  void _validateAndLogin() async {
+    final nationalId = nationalIdController.text.trim();
+    final vehicleNumber = vehicleNumberController.text.trim();
+    final password = passwordController.text.trim();
+
+    setState(() {
+      nationalIdError = nationalId.length != 14 ? 'Enter a valid 14-digit ID' : null;
+      vehicleNumberError = vehicleNumber.isEmpty ? 'Vehicle number is required' : null;
+      passwordError = password.isEmpty ? 'Password is required' : null;
+    });
+
+    if (nationalIdError == null && vehicleNumberError == null && passwordError == null) {
+      bool success = await login(nationalId, vehicleNumber, password);
+      if (success) {
+        Navigator.pushNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed. Please check your credentials.')),
+        );
+      }
+    }
   }
 
   Widget _buildTextField({
@@ -210,19 +154,73 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _validateAndLogin() {
-    final nationalId = nationalIdController.text;
-    final vehicleNumber = vehicleNumberController.text;
-    final password = passwordController.text;
-
-    setState(() {
-      nationalIdError = nationalId.length != 14 ? 'Enter a valid 14-digit ID' : null;
-      vehicleNumberError = vehicleNumber.isEmpty ? 'Vehicle number is required' : null;
-      passwordError = password.isEmpty ? 'Password is required' : null;
-    });
-
-    if (nationalIdError == null && vehicleNumberError == null && passwordError == null) {
-      Navigator.pushNamed(context, '/home');
-    }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.blueblue,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Login to your account',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w300,
+                  fontSize: 32,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Welcome back',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w300,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 35),
+              _buildTextField(
+                label: 'National ID',
+                controller: nationalIdController,
+                errorText: nationalIdError,
+                keyboardType: TextInputType.number,
+                icon: Icons.credit_card,
+              ),
+              const SizedBox(height: 20),
+              _buildTextField(
+                label: 'Vehicle Number',
+                controller: vehicleNumberController,
+                errorText: vehicleNumberError,
+                keyboardType: TextInputType.text,
+                icon: Icons.directions_car,
+              ),
+              const SizedBox(height: 20),
+              _buildPasswordField(),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _validateAndLogin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Login',
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

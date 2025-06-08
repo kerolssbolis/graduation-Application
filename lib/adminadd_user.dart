@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import 'appcolors.dart';
 
@@ -17,33 +19,89 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController nationalIdController = TextEditingController();
   final TextEditingController carNumberController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
-  void _submitForm() {
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final name = nameController.text;
       final phone = phoneController.text;
       final email = emailController.text;
       final nationalId = nationalIdController.text;
       final carNumber = carNumberController.text;
+      final password = passwordController.text;
 
-      // Placeholder - replace with actual DB or API logic
-      print('Name: $name');
-      print('Phone: $phone');
-      print('Email: $email');
-      print('National ID: $nationalId');
-      print('Car Number: $carNumber');
+      final url = Uri.parse('https://taha454-trafficmanager-account.hf.space/mobile/signup/');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User added successfully')),
-      );
+      final payload = {
+        "national_id": nationalId,
+        "name": name,
+        "phone_number": phone,
+        "email": email,
+        "type": "user",
+        "password": password,
+      };
 
-      // Clear fields after submission
-      nameController.clear();
-      phoneController.clear();
-      emailController.clear();
-      nationalIdController.clear();
-      carNumberController.clear();
+      try {
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(payload),
+        );
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          _showSuccessDialog();
+
+          // Clear fields
+          nameController.clear();
+          phoneController.clear();
+          emailController.clear();
+          nationalIdController.clear();
+          carNumberController.clear();
+          passwordController.clear();
+          confirmPasswordController.clear();
+        } else {
+          _showErrorDialog("Failed: ${response.statusCode} - ${response.body}");
+        }
+      } catch (e) {
+        _showErrorDialog("Error: $e");
+      }
     }
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Success'),
+        content: const Text('User added successfully.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -91,6 +149,52 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               const SizedBox(height: 20),
 
               _buildTextField(carNumberController, 'Car Number'),
+              const SizedBox(height: 20),
+
+              _buildTextField(passwordController, 'Password',
+                  obscureText: _obscurePassword,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                      color: Colors.white70,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter Password';
+                    } else if (value.length < 6) {
+                      return 'Password must be at least 6 characters';
+                    }
+                    return null;
+                  }),
+              const SizedBox(height: 20),
+
+              _buildTextField(confirmPasswordController, 'Confirm Password',
+                  obscureText: _obscureConfirmPassword,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                      color: Colors.white70,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      });
+                    },
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please confirm the password';
+                    } else if (value != passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  }),
               const SizedBox(height: 40),
 
               SizedBox(
@@ -117,15 +221,22 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
-      {TextInputType keyboardType = TextInputType.text,
-        String? Function(String?)? validator}) {
+  Widget _buildTextField(
+      TextEditingController controller,
+      String label, {
+        TextInputType keyboardType = TextInputType.text,
+        bool obscureText = false,
+        Widget? suffixIcon,
+        String? Function(String?)? validator,
+      }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      obscureText: obscureText,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white70),
+        suffixIcon: suffixIcon,
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Colors.white54),
           borderRadius: BorderRadius.circular(12),
@@ -146,5 +257,3 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 }
-
-
