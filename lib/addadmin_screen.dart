@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'appcolors.dart';
 
 class AddAdminScreen extends StatefulWidget {
@@ -13,30 +15,80 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController nationalIdController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   bool _obscurePassword = true;
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final name = nameController.text;
-      final nationalId = nationalIdController.text;
-      final password = passwordController.text;
+      final url = Uri.parse("https://taha454-trafficmanager-account.hf.space/mobile/signup/admin");
 
-      // Placeholder - replace with actual DB or API logic
-      print('Admin Name: $name');
-      print('National ID: $nationalId');
-      print('Password: $password');
+      final payload = {
+        "national_id": nationalIdController.text,
+        "name": nameController.text,
+        "email": emailController.text,
+        "phone_number": phoneController.text,
+        "password": passwordController.text,
+      };
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Admin added successfully')),
-      );
+      try {
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(payload),
+        );
 
-      // Clear fields
-      nameController.clear();
-      nationalIdController.clear();
-      passwordController.clear();
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          _showSuccessMessage();
+
+          // Clear fields
+          nameController.clear();
+          nationalIdController.clear();
+          emailController.clear();
+          phoneController.clear();
+          passwordController.clear();
+        } else {
+          _showErrorDialog("Failed: ${response.statusCode} - ${response.body}");
+        }
+      } catch (e) {
+        _showErrorDialog("Error: $e");
+      }
     }
+  }
+
+  void _showSuccessMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: const [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 12),
+            Expanded(child: Text('Admin added successfully')),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -56,19 +108,24 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
             children: [
               _buildTextField(nameController, 'Full Name'),
               const SizedBox(height: 20),
-
-              _buildTextField(nationalIdController, 'National ID',
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter National ID';
-                    } else if (value.length != 14) {
-                      return 'National ID must be 14 digits';
-                    }
-                    return null;
-                  }),
+              _buildTextField(emailController, 'Email', keyboardType: TextInputType.emailAddress),
               const SizedBox(height: 20),
-
+              _buildTextField(phoneController, 'Phone Number', keyboardType: TextInputType.phone),
+              const SizedBox(height: 20),
+              _buildTextField(
+                nationalIdController,
+                'National ID',
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter National ID';
+                  } else if (value.length != 14) {
+                    return 'National ID must be 14 digits';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: passwordController,
                 obscureText: _obscurePassword,
@@ -104,7 +161,6 @@ class _AddAdminScreenState extends State<AddAdminScreen> {
                 },
               ),
               const SizedBox(height: 40),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

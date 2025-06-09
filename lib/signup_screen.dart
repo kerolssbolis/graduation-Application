@@ -24,7 +24,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _isLoading = true;
     });
 
-    final url = Uri.parse('https://taha454-trafficmanager-account.hf.space/mobile/login/');
+    // رابط API الجديد لتسجيل دخول الـ Admin
+    final url = Uri.parse('https://taha454-trafficmanager-account.hf.space/mobile/login/admin');
     final payload = {
       "national_id": nationalIdController.text,
       "password": passwordController.text,
@@ -39,7 +40,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // ممكن تتحقق من محتوى الرد هنا لو حبيت
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful')),
@@ -99,7 +99,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   style: const TextStyle(color: Colors.white),
                   validator: (value) {
-                    if (value == null || value.length != 14 || !RegExp(r'^\d+$').hasMatch(value)) {
+                    if (value == null || value.length != 9 || !RegExp(r'^\d+$').hasMatch(value)) {
                       return 'Please enter a valid 14-digit National ID';
                     }
                     return null;
@@ -134,7 +134,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   style: const TextStyle(color: Colors.white),
                   validator: (value) {
-                    if (value == null || value.length < 6) {
+                    if (value == null || value.length < 4) {
                       return 'Password must be at least 6 characters';
                     }
                     return null;

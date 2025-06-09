@@ -18,31 +18,26 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController nationalIdController = TextEditingController();
-  final TextEditingController carNumberController = TextEditingController();
+  final TextEditingController carNumberController = TextEditingController(); // vehicle_name
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
+  String? _selectedVehicleType;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final name = nameController.text;
-      final phone = phoneController.text;
-      final email = emailController.text;
-      final nationalId = nationalIdController.text;
-      final carNumber = carNumberController.text;
-      final password = passwordController.text;
-
-      final url = Uri.parse('https://taha454-trafficmanager-account.hf.space/mobile/signup/');
+      final url = Uri.parse('https://taha454-trafficmanager-account.hf.space/mobile/signup/user');
 
       final payload = {
-        "national_id": nationalId,
-        "name": name,
-        "phone_number": phone,
-        "email": email,
-        "type": "user",
-        "password": password,
+        "national_id": nationalIdController.text,
+        "name": nameController.text,
+        "email": emailController.text,
+        "phone_number": phoneController.text,
+        "password": passwordController.text,
+        "vehicle_name": carNumberController.text,
+        "vehicle_type": _selectedVehicleType,
       };
 
       try {
@@ -54,8 +49,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           _showSuccessDialog();
-
-          // Clear fields
           nameController.clear();
           phoneController.clear();
           emailController.clear();
@@ -63,6 +56,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           carNumberController.clear();
           passwordController.clear();
           confirmPasswordController.clear();
+          setState(() {
+            _selectedVehicleType = null;
+          });
         } else {
           _showErrorDialog("Failed: ${response.statusCode} - ${response.body}");
         }
@@ -101,6 +97,56 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDropdownField() {
+    const vehicleTypes = ['emergency', 'ambulance', 'police', 'government'];
+
+    return DropdownButtonFormField<String>(
+      value: _selectedVehicleType,
+      items: vehicleTypes.map((type) {
+        return DropdownMenuItem<String>(
+          value: type,
+          child: Text(
+            type,
+            style: const TextStyle(color: Colors.black), // داخل القائمة
+          ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedVehicleType = value;
+        });
+      },
+      decoration: InputDecoration(
+        labelText: 'Vehicle Type',
+        labelStyle: const TextStyle(color: Colors.white70),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white54),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.blue),
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      dropdownColor: Colors.white,
+      style: const TextStyle(color: Colors.white), // يظهر في الحقل
+      selectedItemBuilder: (BuildContext context) {
+        return vehicleTypes.map((type) {
+          return Text(
+            type,
+            style: const TextStyle(color: Colors.white), // النص المختار
+          );
+        }).toList();
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please select a vehicle type';
+        }
+        return null;
+      },
     );
   }
 
@@ -148,7 +194,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   }),
               const SizedBox(height: 20),
 
-              _buildTextField(carNumberController, 'Car Number'),
+              _buildTextField(carNumberController, 'Vehicle Name'),
+              const SizedBox(height: 20),
+
+              _buildDropdownField(),
               const SizedBox(height: 20),
 
               _buildTextField(passwordController, 'Password',
